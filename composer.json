@@ -1,0 +1,12 @@
+{
+    "name": "ysx123/ph_invest_lease",
+    "description": "A face for ph invest_lease",
+    "minimum-stability": "dev",
+    "version": "1.0.0",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "ysx\\recipe\\": "src/"
+        }
+    }
+}
