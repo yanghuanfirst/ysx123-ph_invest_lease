@@ -14,6 +14,8 @@ use common\services\youmi\PictureService;
 use Yii;
 use yii\web\UploadedFile;
 use frontend\controllers\BaseController;
+use ysx\recipe\models\RecipeOrder;
+use function foo\func;
 
 class RecipeController extends BaseController
 {
@@ -26,7 +28,10 @@ class RecipeController extends BaseController
         'my-recipe',
         'add-comment',
         'delete-comment',
-        'my-address'
+        'my-address',
+        "add-address",
+        "edit-address",
+        "del-address",
     ];
     protected $recipeType = [
         [
@@ -109,12 +114,12 @@ class RecipeController extends BaseController
         }
         $offset = ($page - 1) * $pageSize;
         $total = Recipe::find()->where($map)->count();
-        $list = Recipe::find()->select(["id","title","cover_img","type","created_at","collect_num","like_num"])->where($map)->orderBy([
+        $list = Recipe::find()->select(["id","title","cover_img","type","created_at","collect_num","like_num",'collect_num'])->where($map)->orderBy([
             'id' => SORT_DESC,
         ])->offset($offset)->limit($pageSize)->asArray()->all();
         //查询推荐的3条的数据
         //$recommend = Recipe::find()->select(["id","title","cover_img","type"])->where(["recommend"=>2])->limit(3)->asArray()->all();
-        $recommend = Recipe::find()->select(["id","title","cover_img","type"])->orderBy(["like_num"=>SORT_DESC])->limit(3)->asArray()->all();
+        $recommend = Recipe::find()->select(["id","title","cover_img","type","recipe_price"])->orderBy(["collect_num"=>SORT_DESC])->limit(3)->asArray()->all();
         return $this->formatJson(0, 'success', compact('total','list','recommend'));
     }
 
@@ -521,6 +526,12 @@ class RecipeController extends BaseController
         $address->save();
         return $this->formatJson(0, 'action success');
     }
+
+    /**
+     * @desc actionEditAddress 编辑地址
+     * @create_at 2025/3/16 15:09
+     * @return array
+     */
     function actionEditAddress():array
     {
         $userId = $this->getLoginUserId();
@@ -535,11 +546,145 @@ class RecipeController extends BaseController
         if(!$addressInfo){
             return $this->formatJson(-1, "address not exist");
         }
-        $addressInfo->setAttributes($data);
+        //$addressInfo->setAttributes($data);
+        $addressInfo->address = $data['address'];
+        $addressInfo->consignee = $data['consignee'];
+        $addressInfo->consignee_tel = $data['consignee_tel'];
+        $addressInfo->is_default = $data['is_default'];
         $addressInfo->save();
        return $this->formatJson(0, 'action success');
     }
 
+    /**
+     * @desc actionDelAddress 删除地址
+     * @create_at 2025/3/16 15:35
+     * @return array
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    function actionDelAddress():array
+    {
+        $userId = $this->getLoginUserId();
+        $request = Yii::$app->request;
+        $address = new RecipeAddress();
+        $address->scenario = 'del_address';
+        $data = Yii::$app->request->post();
+        $address->load($data,"");
+        if (!$address->validate()) {
+            return $this->formatJson(ResponseCode::PARAM_CHECK_FAIL, current($address->getFirstErrors()));
+        }
+        $info = RecipeAddress::find()->where(["user_id"=>$userId,"id"=>$data["id"]])->one();
+        if (!$info){
+            return $this->formatJson(-1, "address not exist");
+        }
+        $info->delete();
+        return $this->formatJson(0, 'delete success');
+    }
+
+    /**
+     * @desc actionAddOrder 下单
+     * @create_at 2025/3/16 15:56
+     * @return array
+     */
+    function actionAddOrder():array
+    {
+        $userId = $this->getLoginUserId();
+        $request = Yii::$app->request;
+        $order = new RecipeOrder();
+        $order->scenario = 'add_order';
+        $data = Yii::$app->request->post();
+        $order->load($data,"");
+        if (!$order->validate()) {
+            return $this->formatJson(ResponseCode::PARAM_CHECK_FAIL, current($order->getFirstErrors()));
+        }
+        $order->remark = $data["remark"];
+        $order->address_id = $data["address_id"];
+        $order->order_no = $this->generateOrderNumber();
+        $order->user_id = $userId;
+        $order->save();
+        return $this->formatJson(0, 'action success');
+    }
+
+    /**
+     * @desc actionOrderList 订单列表
+     * @create_at 2025/3/16 16:07
+     * @return array
+     */
+    function actionOrderList():array
+    {
+        $userId = $this->getLoginUserId();
+        $order = new RecipeOrder();
+        $order->scenario = 'order_list';
+        $data = Yii::$app->request->get();
+        $order->load($data,"");
+        if (!$order->validate()) {
+            return $this->formatJson(ResponseCode::PARAM_CHECK_FAIL, current($order->getFirstErrors()));
+        }
+        $map["user_id"] = $userId;
+        if($data["order_status"]){
+            $map["order_status"] = $data["order_status"];
+        }
+        $list = RecipeOrder::find()->select(["id","recipe_id","address_id","order_no","order_status","remark","created_at"])->with(["recipe"=>function($query){
+            $query->select(["id","title","cover_img","recipe_price"]);
+        },"address"=>function($query){
+            $query->select(["id","address","consignee","consignee_tel"]);
+        }])->where($map)->orderBy([
+            'id' => SORT_DESC,
+        ])->asArray()->all();
+        foreach ($list as $key=>$item){
+            $item["order_status_zh"] = match($item["order_status"]){
+                1=>"Under review",
+                2=>"Successful audit",
+                3=>"Audit failure",
+                default=>"unknown"
+            };
+            $list[$key] = $item;
+        }
+
+        return $this->formatJson(0, 'success',compact("list"));
+    }
+
+    function actionOrderDetail():array
+    {
+        $userId = $this->getLoginUserId();
+        $order = new RecipeOrder();
+        $order->scenario = 'order_detail';
+        $data = Yii::$app->request->get();
+        $order->load($data,"");
+        if (!$order->validate()) {
+            return $this->formatJson(ResponseCode::PARAM_CHECK_FAIL, current($order->getFirstErrors()));
+        }
+        $map["user_id"] = $userId;
+        if($data["id"]){
+            $map["id"] = $data["id"];
+        }
+        $info = RecipeOrder::find()->select(["id","recipe_id","address_id","order_no","order_status","remark","created_at"])->with(["recipe"=>function($query){
+            $query->select(["id","title","cover_img","recipe_price"]);
+        },"address"=>function($query){
+            $query->select(["id","address","consignee","consignee_tel"]);
+        }])->where($map)->orderBy([
+            'id' => SORT_DESC,
+        ])->asArray()->one();
+        if(!$info)
+            return $this->formatJson(-1, "order not exist");
+        $info["order_status_zh"] = match($info["order_status"]){
+            1=>"Under review",
+            2=>"Successful audit",
+            3=>"Audit failure",
+            default=>"unknown"
+        };
+        return $this->formatJson(0, 'success',compact("info"));
+    }
+
+    /**
+     * @desc generateOrderNumber 生成订单号
+     * @create_at 2025/3/16 15:55
+     * @return string
+     */
+    function generateOrderNumber():string
+    {
+        return date('YmdHis') . substr(uniqid(), -5);
+    }
     /**
      * 获取oss配置的key
      *

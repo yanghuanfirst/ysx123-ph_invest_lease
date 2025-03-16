@@ -16,6 +16,7 @@ class m230225_123456_create_recipe_table extends Migration
             'cover_img' => $this->string(255)->notNull()->defaultValue('')->comment('封面图片'),
             'type' => $this->smallInteger(3)->defaultValue(null)->comment('类型'),
             'recommend' => $this->tinyInteger(1)->notNull()->defaultValue(1)->comment('1：不推荐 2：推荐'),
+            'recipe_price' => $this->decimal(10, 2)->notNull()->defaultValue(0)->comment('价格'),
             'detail' => $this->text()->notNull()->comment('详细内容'),
             'user_id' => $this->integer(11)->notNull()->defaultValue(0)->comment('用户ID'),
             'collect_num' => $this->integer(11)->notNull()->defaultValue(0)->comment('收藏数'),

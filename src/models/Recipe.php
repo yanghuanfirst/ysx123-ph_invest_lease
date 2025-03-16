@@ -114,6 +114,14 @@ class Recipe extends ActiveRecord
                 "message"=>"The detailed steps format is incorrect",
                 'on' => 'add_recipe',
             ],
+            [['recipe_price'], 'required', 'message' => 'goods price is required.','on' => 'add_recipe',],
+            [['recipe_price'],
+                'number', 'min' => 0.01, 'max' => 999999.99,
+                'tooSmall' => 'Price must be greater than or equal to 0.01.',
+                'tooBig' => 'Price must be less than or equal to 999999.99.',
+                'message' => 'Price must be a valid number.',
+                'on' => 'add_recipe',
+            ],
             //删除菜谱验证
             [
                 ["id"],"required","message"=>"Missing parameter",'on' => 'del_recipe',
@@ -358,7 +366,7 @@ class Recipe extends ActiveRecord
         $scenarios = parent::scenarios();
         $scenarios['recipe_list'] = ['title', 'type',"page","size"];
         $scenarios['upload_image'] = ['image_file'];
-        $scenarios['add_recipe'] = ['title', 'type',"detail","cover_img"];
+        $scenarios['add_recipe'] = ['title', 'type',"detail","cover_img",'recipe_price'];
         $scenarios['del_recipe'] = ['id'];
         $scenarios['collect'] = ['id','action_type'];
         $scenarios['detail'] = ['id'];

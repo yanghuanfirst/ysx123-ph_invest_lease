@@ -1,7 +1,7 @@
 <?php
 use yii\db\Migration;
 
-class m230225_123456_create_address_table extends Migration
+class m250225_123326_create_recipe_order_table extends Migration
 {
     public function up()
     {
@@ -13,10 +13,11 @@ class m230225_123456_create_address_table extends Migration
         $this->createTable('{{%recipe_order}}', [
             'id' => $this->primaryKey()->unsigned()->comment('主键ID'),
             'user_id' => $this->integer(11)->notNull()->defaultValue(0)->comment('用户ID'),
-            'address_id' => $this->integer(11)->notNull()->defaultValue('')->comment('收货地址表的id--recipe_address'),
+            'recipe_id' => $this->integer(11)->notNull()->defaultValue(0)->comment('商品ID'),
+            'address_id' => $this->integer(11)->notNull()->defaultValue(0)->comment('收货地址表的id--recipe_address'),
             'order_no' => $this->string(50)->notNull()->defaultValue("")->comment('订单号'),
-            'order_status' => $this->string(20)->notNull()->defaultValue("")->comment('收货人手机号'),
-            'remark' => $this->string(255)->notNull()->defaultValue(1)->comment('备注'),
+            'order_status' => $this->tinyInteger(1)->notNull()->defaultValue(1)->comment('订单状态  1：待审核  2：审核通过  3：审核未通过'),
+            'remark' => $this->string(255)->notNull()->defaultValue("")->comment('备注'),
             'created_at' => $this->timestamp()->defaultValue(null)->comment('创建时间'),
             'updated_at' => $this->timestamp()->defaultValue(null)->comment('更新时间'),
         ], $tableOptions);

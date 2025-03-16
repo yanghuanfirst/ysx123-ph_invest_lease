@@ -1,7 +1,7 @@
 <?php
 use yii\db\Migration;
 
-class m230225_123456_create_address_table extends Migration
+class m250225_123326_create_recipe_address_table extends Migration
 {
     public function up()
     {

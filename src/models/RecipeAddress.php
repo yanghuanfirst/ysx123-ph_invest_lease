@@ -47,19 +47,18 @@ class RecipeAddress extends ActiveRecord
                 "tooShort" => 'The minimum length of the consignee telphone is 10 characters'
             ],
             [
-                ["is_default"], "required", "message" => "Please select a default shipping address", 'on' => 'add_address',
+                ["is_default"], "required",
+                "message" => "Please select a default shipping address",
+                'on' => 'add_address',
             ],
             [
                 ['is_default'],
                 'integer',
+                'min' => 1, 'max' => 2, // 👌 直接限制 1-2
+                'on' => 'add_address',
                 "message" => "The default shipping address format is incorrect",
-                'on' => 'add_address',
-            ],
-            [
-                ['is_default'],
-                'range' => [1, 2],
-                'on' => 'add_address',
-                'message' => 'Action type must be either 1 or 2.',
+                'tooSmall' => 'The maximum length 2',
+                "tooBig" => 'The minimum length 1'
             ],
 
             // 编辑地址验证
@@ -106,19 +105,26 @@ class RecipeAddress extends ActiveRecord
                 "tooShort" => 'The minimum length of the consignee telphone is 10 characters'
             ],
             [
-                ["is_default"], "required", "message" => "Please select a default shipping address", 'on' => 'add_address',
+                ["is_default"], "required", "message" => "Please select a default shipping address", 'on' => 'edit_address',
             ],
             [
                 ['is_default'],
                 'integer',
-                "message" => "The default shipping address format is incorrect",
+                'min' => 1, 'max' => 2, // 👌 直接限制 1-2
                 'on' => 'edit_address',
+                "message" => "The default shipping address format is incorrect",
+                'tooSmall' => 'The maximum length 2',
+                "tooBig" => 'The minimum length 1'
+            ],
+            // 删除地址验证
+            [
+                ["id"],"required","message"=>"Missing parameter",'on' => 'del_address',
             ],
             [
-                ['is_default'],
-                'range' => [1, 2],
-                'on' => 'edit_address',
-                'message' => 'Action type must be either 1 or 2.',
+                ["id"],"integer",
+                'min' => 1,
+                'tooSmall' => 'The minimum length of the param is 1',
+                "message"=>"Missing parameter",'on' => 'del_address',
             ],
         ];
 
@@ -127,6 +133,8 @@ class RecipeAddress extends ActiveRecord
     {
         $scenarios = parent::scenarios();
         $scenarios['add_address'] = ['address', 'consignee',"consignee_tel","is_default"];
+        $scenarios['edit_address'] = ["id",'address', 'consignee',"consignee_tel","is_default"];
+        $scenarios['del_address'] = ['id'];
         return $scenarios;
     }
     public function behaviors()
