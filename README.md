@@ -1,7 +1,7 @@
 # 投资分享模块安装
 ### 1：通过composer安装
 ```bash
-composer require ysx123/ph_invest:dev-master --ignore-platform-reqs
+composer require ysx123/ph_invest_lease:dev-master --ignore-platform-reqs
 ```
 ### 2：在项目中增加模块的路由。修改配置文件：D:\www\ysx_www\ph02\shiny-pera-ios-dc\frontend\config\main.php
 ```php

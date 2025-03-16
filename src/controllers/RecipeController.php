@@ -503,6 +503,42 @@ class RecipeController extends BaseController
         return $this->formatJson(0, 'success',compact("list"));
     }
 
+    /**
+     * @desc actionAddAddress
+     * @create_at 2025/3/16 13:36
+     * @return array
+     */
+    function actionAddAddress():array
+    {
+        $userId = $this->getLoginUserId();
+        $address = new RecipeAddress();
+        $address->scenario = 'add_address';
+        $address->load(Yii::$app->request->post(),"");
+        if (!$address->validate()) {
+            return $this->formatJson(ResponseCode::PARAM_CHECK_FAIL, current($address->getFirstErrors()));
+        }
+        $address->user_id = $userId;
+        $address->save();
+        return $this->formatJson(0, 'action success');
+    }
+    function actionEditAddress():array
+    {
+        $userId = $this->getLoginUserId();
+        $address = new RecipeAddress();
+        $address->scenario = 'edit_address';
+        $data = Yii::$app->request->post();
+        $address->load($data,"");
+        if (!$address->validate()) {
+            return $this->formatJson(ResponseCode::PARAM_CHECK_FAIL, current($address->getFirstErrors()));
+        }
+        $addressInfo = RecipeAddress::find()->where(["user_id"=>$userId,"id"=>$data["id"]])->one();
+        if(!$addressInfo){
+            return $this->formatJson(-1, "address not exist");
+        }
+        $addressInfo->setAttributes($data);
+        $addressInfo->save();
+       return $this->formatJson(0, 'action success');
+    }
 
     /**
      * 获取oss配置的key
