@@ -32,6 +32,9 @@ class RecipeController extends BaseController
         "add-address",
         "edit-address",
         "del-address",
+        "add-order",
+        'order-list',
+        'order-detail'
     ];
     protected $recipeType = [
         [
