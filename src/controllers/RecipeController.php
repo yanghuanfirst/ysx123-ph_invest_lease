@@ -247,7 +247,7 @@ class RecipeController extends BaseController
         }
         $map[] = ['id'=>$recipeIds];
 
-        $list = Recipe::find()->where($map)->select(["id","title","cover_img","type"])->offset($offset)->limit($pageSize)->orderBy(["id"=>SORT_DESC])->asArray()->all();
+        $list = Recipe::find()->where($map)->select(["id","title","cover_img","type","recipe_price"])->offset($offset)->limit($pageSize)->orderBy(["id"=>SORT_DESC])->asArray()->all();
         $total = Recipe::find()->where($map)->count();
         return $this->formatJson(0, 'success',compact("list","total"));
     }
@@ -324,7 +324,7 @@ class RecipeController extends BaseController
             return $this->formatJson(ResponseCode::PARAM_CHECK_FAIL, current($recipeModel->getFirstErrors()));
         }
         $recipeId = $request->get("id",0);
-        $info = Recipe::find()->select(["id","title","cover_img","type","detail","created_at","user_id","collect_num","like_num"])->where(["id"=>$recipeId])->asArray()->one();
+        $info = Recipe::find()->select(["id","title","cover_img","type","detail","created_at","user_id","collect_num","like_num","recipe_price"])->where(["id"=>$recipeId])->asArray()->one();
         if(!$info)
             return $this->formatJson(-1, "recipe not exist");
         $info["is_collect"] = 0;//0：不显示收藏按钮  1：显示收藏按钮
@@ -402,7 +402,7 @@ class RecipeController extends BaseController
         }
         $offset = ($page - 1) * $pageSize;
         $total = Recipe::find()->where(["user_id"=>$userId])->count();
-        $list = Recipe::find()->where(["user_id"=>$userId])->select(["id","title","cover_img","type","created_at"])->orderBy([
+        $list = Recipe::find()->where(["user_id"=>$userId])->select(["id","title","cover_img","type","created_at","recipe_price"])->orderBy([
             'id' => SORT_DESC,
         ])->offset($offset)->limit($pageSize)->asArray()->all();
         //收藏数量
