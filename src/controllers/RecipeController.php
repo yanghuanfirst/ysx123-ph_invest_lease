@@ -337,6 +337,8 @@ class RecipeController extends BaseController
                 $info["is_collect"] = 1;//0：不显示收藏按钮  1：显示收藏按钮
                 $info["is_like"] = 1;//0：不显示点赞按钮  1：显示点赞按钮
                 $info["is_delete"] = 0;//0：不显示删除按钮  1：显示删除按钮
+            }else{
+                $info["is_delete"] = 1;//0：不显示删除按钮  1：显示删除按钮
             }
             //判断是否收藏
             if($info["is_collect"] == 1 || $info["is_like"] == 1){
