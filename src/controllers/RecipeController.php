@@ -233,7 +233,7 @@ class RecipeController extends BaseController
         if (!$recipeModel->validate()) {
             return $this->formatJson(ResponseCode::PARAM_CHECK_FAIL, current($recipeModel->getFirstErrors()));
         }
-        $collectInfo = RecipeCollect::find()->select(["user_id","recipe_id"])->where(["user_id"=>$userId])->asArray()->all();
+        $collectInfo = RecipeCollect::find()->select(["user_id","recipe_id"])->where(["user_id"=>$userId,"action_type"=>1])->asArray()->all();
         $recipeIds = array_column($collectInfo,"recipe_id");
         $list = [];
         $total = 0;
