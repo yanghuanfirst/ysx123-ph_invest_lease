@@ -268,7 +268,7 @@ class Recipe extends ActiveRecord
             ],
             //发布评论验证
             [
-                ['comment_content'], 'string',
+                ['comment_content'], 'required',
                 "message"=>"The comment content format is incorrect",
                 'on' => 'add_comment',
             ],
@@ -321,14 +321,14 @@ class Recipe extends ActiveRecord
                 [
                     ['recipe_id'], 'required',
                     'message' => 'Missing parameter',
-                    'on' => 'add_comment',
+                    'on' => 'recipe_comment_list',
                 ],
             [
                 ['recipe_id'], 'integer',
                 'min' => 1,
                 'message' => 'ID Incorrect type parameter',
                 'tooSmall' => 'ID number minimum 1',
-                'on' => 'add_comment',
+                'on' => 'recipe_comment_list',
             ],
             //删除评论验证
             [['comment_id'], 'required',
@@ -372,6 +372,7 @@ class Recipe extends ActiveRecord
         $scenarios['detail'] = ['id'];
         $scenarios['my_recipe'] = ["page","size"];
         $scenarios['collect_list'] = ['title',"page","size"];
+        $scenarios['add_comment'] = ['comment_content',"recipe_id"];
         return $scenarios;
     }
 }
