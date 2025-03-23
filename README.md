@@ -44,6 +44,9 @@ composer require ysx123/ph_invest_lease:dev-master --ignore-platform-reqs
     '/recipe/recipe/add-order' => "credit/syncabl18",
     '/recipe/recipe/order-list' => "credit/syncabl19",
     '/recipe/recipe/order-detail' => "credit/syncabl20",
+    '/recipe/recipe/report-recipe' => "LookinMe/syncabl21",
+    '/recipe/recipe/report-type' => "LookinMe/syncabl22",
+
 ```
 ### 4:修改app-api-doc项目，增加文档，直接复制到相应项目的文档目录里。示例文档在：D:\www\ysx_www\app-api-doc\docs\ph_life_assistant_ios\recipe.md
 

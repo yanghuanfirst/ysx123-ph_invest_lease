@@ -34,7 +34,8 @@ class RecipeController extends BaseController
         "del-address",
         "add-order",
         'order-list',
-        'order-detail'
+        'order-detail',
+        'report-recipe'
     ];
     protected $recipeType = [
         [
@@ -70,7 +71,40 @@ class RecipeController extends BaseController
             "value"=>"Wealth Management"
         ]
     ];
-
+    protected $reportType = [
+        [
+            "id"=>1,
+            "value"=>"False Information",
+        ],
+        [
+            "id"=>2,
+            "value"=>"Scam or Fraud",
+        ],
+        [
+            "id"=>3,
+            "value"=>"Ads or Spam",
+        ],
+        [
+            "id"=>4,
+            "value"=>"Malicious Behavior",
+        ],
+        [
+            "id"=>5,
+            "value"=>"Inappropriate Content",
+        ],
+        [
+            "id"=>6,
+            "value"=>"FPrivacy Violation",
+        ],
+        [
+            "id"=>7,
+            "value"=>"Misleading Investment Advice",
+        ],
+        [
+            "id"=>8,
+            "value"=>"Other",
+        ],
+    ];
     /**
      * @desc actionRecipeType 菜谱类型
      * @create_at 2025/2/26 11:06
@@ -89,6 +123,15 @@ class RecipeController extends BaseController
             ];
         }
         return $this->formatJson(0, 'success', ["type_list"=>$result]);
+    }
+    /**
+     * @desc actionReportType 举报类型
+     * @create_at 2025/3/22 15:13
+     * @return array
+     */
+    function actionReportType():array
+    {
+        return $this->formatJson(0, 'success', ["type_list"=>$this->reportType]);
     }
     /**
      * @desc actionIndex 首页菜谱列表
@@ -404,9 +447,19 @@ class RecipeController extends BaseController
         }
         $offset = ($page - 1) * $pageSize;
         $total = Recipe::find()->where(["user_id"=>$userId])->count();
-        $list = Recipe::find()->where(["user_id"=>$userId])->select(["id","title","cover_img","type","created_at","recipe_price"])->orderBy([
+        $list = Recipe::find()->where(["user_id"=>$userId])->select(["id","title","cover_img","type","created_at","recipe_price","recipe_status"])->orderBy([
             'id' => SORT_DESC,
         ])->offset($offset)->limit($pageSize)->asArray()->all();
+        foreach ($list as $k=>$v){
+            $v["status_zh"] = match($v["recipe_status"]){
+                1 => "Under review",
+                2 => "Approved",
+                3 => "Rejected",
+                4 => "Reported",
+                default => "Unknown"
+            };
+            $list[$k] = $v;
+        }
         //收藏数量
         $collectCount = RecipeCollect::find()->where(["user_id"=>$userId])->count();
         return $this->formatJson(0, 'success', compact('total','list',"collectCount"));
